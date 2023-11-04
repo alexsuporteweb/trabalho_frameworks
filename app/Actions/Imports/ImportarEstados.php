@@ -28,6 +28,7 @@ class ImportarEstados
                     $this->apiIbgeLocalidadesUrl  . '/estados'
                 )->body()
             );
+
             if ($dados) :
                 foreach ($dados as $dado) :
                     $id = $dado->id;

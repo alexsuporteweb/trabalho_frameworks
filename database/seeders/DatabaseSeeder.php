@@ -14,6 +14,7 @@ class DatabaseSeeder extends Seeder
     public function run(): void
     {
         $this->call([
+            UserDefaultSeeder::class,
             PaisesSeeder::class,
             RegioesSeeder::class,
             EstadosSeeder::class,
@@ -26,7 +27,7 @@ class DatabaseSeeder extends Seeder
             DivisoesSeeder::class,
             GruposSeeder::class,
             ClassesSeeder::class,
-            SubclassesSeeder::class,
+            // SubclassesSeeder::class,
         ]);
     }
 }
