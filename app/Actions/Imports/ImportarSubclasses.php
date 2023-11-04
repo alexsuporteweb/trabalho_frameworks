@@ -43,7 +43,7 @@ class ImportarSubclasses
                     $divisao_id = Divisoes::where('codigo', $dado->classe->grupo->divisao->id)->first()->id;
                     $secao_id = Secoes::where('codigo', $dado->classe->grupo->divisao->secao->id)->first()->id;
 
-                    $observacoes = '';
+                   $observacoes = '';
                     for ($i = 0; $i < count($dado->observacoes); $i++) :
                         $observacoes .= "{$dado->observacoes[$i]}\r\n";
                     endfor;
@@ -73,6 +73,19 @@ class ImportarSubclasses
                 //         'observacoes' => $observacoes,
                 //     ]
                 // );
+
+                $retorno = $this->subClasses::updateOrCreate(
+                        [
+                            'codigo' => $codigo
+                        ],
+                        [
+                            'descricao' => $descricao,
+                            'classe_id' => $classe_id,
+                            'grupo_id' => $grupo_id,
+                            'divisao_id' => $divisao_id,
+                            'secao_id' => $secao_id,
+                        ]
+                    );
                 endforeach;
             endif;
             DB::commit();
