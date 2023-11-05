@@ -27,7 +27,7 @@ class DatabaseSeeder extends Seeder
             DivisoesSeeder::class,
             GruposSeeder::class,
             ClassesSeeder::class,
-            // SubclassesSeeder::class,
+            SubclassesSeeder::class,
         ]);
     }
 }
