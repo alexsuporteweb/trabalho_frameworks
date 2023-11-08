@@ -2,14 +2,24 @@
 
 cp .env.example .env
 
-definir nome do banco de dados: trabalho_frameworks
+Definir as variáveis do .env
 
-composer install
+DB_CONNECTION=mysql
+DB_HOST=db
+DB_PORT=3306
+DB_DATABASE=trabalho_frameworks
+DB_USERNAME=root
+DB_PASSWORD=password
 
-npm i
 
-npm run dev
+docker compose build
 
-optimize.cmd
+docker compose exec app composer install
 
-php artisan migrate:refresh --seed
+docker compose exec app npm i
+
+docker compose exec app npm run dev
+
+docker compose exec app optimize.cmd
+
+docker compose exec app php artisan migrate:refresh --seed
