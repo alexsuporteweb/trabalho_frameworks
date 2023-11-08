@@ -30,6 +30,12 @@ DB_PASSWORD=password
 docker compose build
 ```
 
+## Crie os containers com docker compose
+
+```bash
+docker compose up -d
+```
+
 
 ## Execute os comandos no container app
 
