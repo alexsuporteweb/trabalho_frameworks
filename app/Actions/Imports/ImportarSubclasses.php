@@ -26,7 +26,7 @@ class ImportarSubclasses
     {
         try {
             $url = $this->apiIbgeCnaeUrl . '/subclasses';
-            $data = Http::timeout(300)->retry(3, 1000)->get($url);
+            $data = Http::timeout(600)->retry(3, 1000)->get($url);
 
             $dados = json_decode(Http::get($url)->body(), true);
 
