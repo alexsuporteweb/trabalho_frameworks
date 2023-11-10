@@ -14,7 +14,7 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('microregioes', function (Blueprint $table) {
+        Schema::create('microrregioes', function (Blueprint $table) {
             $table->bigIncrements('id');
             $table->string('nome', 120)->index();
             $table->foreignIdFor(Mesorregioes::class, 'mesorregiao_id')
@@ -39,6 +39,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('microregioes');
+        Schema::dropIfExists('microrregioes');
     }
 };

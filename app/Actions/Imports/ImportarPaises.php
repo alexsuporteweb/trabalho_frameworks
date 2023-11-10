@@ -4,7 +4,6 @@ namespace App\Actions\Imports;
 
 use App\Models\Paises;
 use Exception;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 
@@ -21,16 +20,13 @@ class ImportarPaises
 
     public function executar()
     {
-        DB::beginTransaction();
         try {
-            $dados = json_decode(
-                Http::get(
-                    $this->apiIbgeLocalidadesUrl . '/paises'
-                )->body(),
-                true
-            );
+            $url = $this->apiIbgeLocalidadesUrl . '/paises';
+            $data = Http::timeout(300)->retry(3, 1000)->get($url);
 
-            if ($dados) {
+            $dados = json_decode(Http::get($url)->body(), true);
+
+            if ($data->status() === 200) :
                 foreach ($dados as $dado) {
                     $m49 = $dado['id']['M49'];
                     $iso_alpha_2 = $dado['id']['ISO-ALPHA-2'];
@@ -59,10 +55,10 @@ class ImportarPaises
                         ]
                     );
                 }
-            }
-            DB::commit();
+            else :
+                return response()->json(['message' => 'Erro na solicitação. Status code:'], $dados()->status());
+            endif;
         } catch (\Throwable $th) {
-            DB::rollBack();
             Log::error('Erro durante consulta de API', ['erro' => $th->getMessage()]);
             throw new Exception($th->getMessage(), 1);
         }

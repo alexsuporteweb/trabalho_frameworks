@@ -8,7 +8,6 @@ use App\Models\Grupos;
 use App\Models\Secoes;
 use App\Models\Subclasses;
 use Exception;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 
@@ -25,28 +24,38 @@ class ImportarSubclasses
 
     public function executar()
     {
-        DB::beginTransaction();
         try {
-            $dados = json_decode(
-                Http::timeout(260)->get(
-                    $this->apiIbgeCnaeUrl . '/subclasses'
-                )->body()
-            );
+            $url = $this->apiIbgeCnaeUrl . '/subclasses';
+            $data = Http::timeout(300)->retry(3, 1000)->get($url);
 
-            if ($dados) :
+            $dados = json_decode(Http::get($url)->body(), true);
+
+            if ($data->status() === 200) :
                 foreach ($dados as $dado) :
-                    $codigo = $dado->id;
-                    $descricao = $dado->descricao;
-                    $classe_id = Classes::where('codigo', $dado->classe->id)->first()->id;
-                    $grupo_id = Grupos::where('codigo', $dado->classe->grupo->id)->first()->id;
-                    $divisao_id = Divisoes::where('codigo', $dado->classe->grupo->divisao->id)->first()->id;
-                    $secao_id = Secoes::where('codigo', $dado->classe->grupo->divisao->secao->id)->first()->id;
+                    $codigo = $dado['id'];
+                    $descricao = $dado['descricao'];
+                    $classe_id = Classes::where('codigo', $dado['classe']['id'])->first()->id;
+                    $grupo_id = Grupos::where('codigo', $dado['classe']['grupo']['id'])->first()->id;
+                    $divisao_id = Divisoes::where('codigo', $dado['classe']['grupo']['divisao']['id'])->first()->id;
+                    $secao_id = Secoes::where('codigo', $dado['classe']['grupo']['divisao']['secao']['id'])->first()->id;
+
+                    $atividades = '';
+                    for ($i = 0; $i < count($dado['atividades']); $i++) :
+                        $atividades .= "{$dado['atividades'][$i]}\r\n";
+                    endfor;
+
+                    $observacoes = '';
+                    for ($i = 0; $i < count($dado['observacoes']); $i++) :
+                        $observacoes .= "{$dado['observacoes'][$i]}\r\n";
+                    endfor;
 
                     $retorno = $this->subClasses::updateOrCreate(
                         [
                             'codigo' => $codigo
                         ],
                         [
+                            'atividades' => $atividades,
+                            'observacoes' => $observacoes,
                             'descricao' => $descricao,
                             'classe_id' => $classe_id,
                             'grupo_id' => $grupo_id,
@@ -55,10 +64,10 @@ class ImportarSubclasses
                         ]
                     );
                 endforeach;
+            else :
+                return response()->json(['message' => 'Erro na solicitação. Status code:'], $dados()->status());
             endif;
-            DB::commit();
         } catch (\Throwable $th) {
-            DB::rollBack();
             Log::error('Erro durante consulta de API', ['erro' => $th->getMessage()]);
             throw new Exception($th->getMessage(), 1);
         }

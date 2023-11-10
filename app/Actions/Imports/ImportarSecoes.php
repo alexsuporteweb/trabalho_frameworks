@@ -4,7 +4,6 @@ namespace App\Actions\Imports;
 
 use App\Models\Secoes;
 use Exception;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 
@@ -21,21 +20,20 @@ class ImportarSecoes
 
     public function executar()
     {
-        DB::beginTransaction();
         try {
-            $dados = json_decode(
-                Http::get(
-                    $this->apiIbgeCnaeUrl . '/secoes'
-                )->body()
-            );
-            if ($dados) :
+            $url = $this->apiIbgeCnaeUrl . '/secoes';
+            $data = Http::timeout(300)->retry(3, 1000)->get($url);
+
+            $dados = json_decode(Http::get($url)->body(), true);
+
+            if ($data->status() === 200) :
                 foreach ($dados as $dado) :
-                    $codigo = $dado->id;
-                    $descricao = $dado->descricao;
+                    $codigo = $dado['id'];
+                    $descricao = $dado['descricao'];
 
                     $observacoes = '';
-                    for ($i = 0; $i < count($dado->observacoes); $i++) :
-                        $observacoes .= "{$dado->observacoes[$i]}\r\n";
+                    for ($i = 0; $i < count($dado['observacoes']); $i++) :
+                        $observacoes .= "{$dado['observacoes'][$i]}\r\n";
                     endfor;
 
                     $retorno = $this->secoes::updateOrCreate(
@@ -48,10 +46,10 @@ class ImportarSecoes
                         ]
                     );
                 endforeach;
+            else :
+                return response()->json(['message' => 'Erro na solicitação. Status code:'], $dados()->status());
             endif;
-            DB::commit();
         } catch (\Throwable $th) {
-            DB::rollBack();
             Log::error('Erro durante consulta de API', ['erro' => $th->getMessage()]);
             throw new Exception($th->getMessage(), 1);
         }

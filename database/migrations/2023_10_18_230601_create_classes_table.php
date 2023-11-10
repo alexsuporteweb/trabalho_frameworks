@@ -18,9 +18,9 @@ return new class extends Migration
             $table->bigIncrements('id');
             $table->char('codigo', 10)->unique();
             $table->foreignIdFor(Grupos::class, 'grupo_id')
-            ->constrained('grupos')
-            ->onDelete('restrict')
-            ->onUpdate('restrict');
+                ->constrained('grupos')
+                ->onDelete('restrict')
+                ->onUpdate('restrict');
             $table->foreignIdFor(Divisoes::class, 'divisao_id')
                 ->constrained('divisoes')
                 ->onDelete('restrict')

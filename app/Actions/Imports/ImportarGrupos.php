@@ -6,7 +6,6 @@ use App\Models\Divisoes;
 use App\Models\Grupos;
 use App\Models\Secoes;
 use Exception;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 
@@ -23,19 +22,18 @@ class ImportarGrupos
 
     public function executar()
     {
-        DB::beginTransaction();
         try {
-            $dados = json_decode(
-                Http::get(
-                    $this->apiIbgeCnaeUrl . '/grupos'
-                )->body()
-            );
-            if ($dados) :
+            $url = $this->apiIbgeCnaeUrl . '/grupos';
+            $data = Http::timeout(300)->retry(3, 1000)->get($url);
+
+            $dados = json_decode(Http::get($url)->body(), true);
+
+            if ($data->status() === 200) :
                 foreach ($dados as $dado) :
-                    $codigo = $dado->id;
-                    $divisao_id = Divisoes::where('codigo', $dado->divisao->id)->first()->id;
-                    $secao_id = Secoes::where('codigo', $dado->divisao->secao->id)->first()->id;
-                    $descricao = $dado->descricao;
+                    $codigo = $dado['id'];
+                    $divisao_id = Divisoes::where('codigo', $dado['divisao']['id'])->first()->id;
+                    $secao_id = Secoes::where('codigo', $dado['divisao']['secao']['id'])->first()->id;
+                    $descricao = $dado['descricao'];
                     $retorno = $this->grupos::updateOrCreate(
                         [
                             'codigo' => $codigo
@@ -47,10 +45,10 @@ class ImportarGrupos
                         ]
                     );
                 endforeach;
+            else :
+                return response()->json(['message' => 'Erro na solicitação. Status code:'], $dados()->status());
             endif;
-            DB::commit();
         } catch (\Throwable $th) {
-            DB::rollBack();
             Log::error('Erro durante consulta de API', ['erro' => $th->getMessage()]);
             throw new Exception($th->getMessage(), 1);
         }

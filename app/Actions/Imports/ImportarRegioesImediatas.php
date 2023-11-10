@@ -4,7 +4,6 @@ namespace App\Actions\Imports;
 
 use App\Models\RegioesImediatas;
 use Exception;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 
@@ -21,20 +20,19 @@ class ImportarRegioesImediatas
 
     public function executar()
     {
-        DB::beginTransaction();
         try {
-            $dados = json_decode(
-                Http::get(
-                    $this->apiIbgeLocalidadesUrl . '/regioes-imediatas'
-                )->body()
-            );
-            if ($dados) :
+            $url = $this->apiIbgeLocalidadesUrl . '/regioes-imediatas';
+            $data = Http::timeout(300)->retry(3, 1000)->get($url);
+
+            $dados = json_decode(Http::get($url)->body(), true);
+
+            if ($data->status() === 200) :
                 foreach ($dados as $dado) :
-                    $id = $dado->id;
-                    $nome = $dado->nome;
-                    $regiao_intermediaria_id = $dado->{"regiao-intermediaria"}->id;
-                    $estado_id = $dado->{"regiao-intermediaria"}->UF->id;
-                    $regiao_id = $dado->{"regiao-intermediaria"}->UF->regiao->id;
+                    $id = $dado['id'];
+                    $nome = $dado['nome'];
+                    $regiao_intermediaria_id = $dado['regiao-intermediaria']['id'];
+                    $estado_id = $dado['regiao-intermediaria']['UF']['id'];
+                    $regiao_id = $dado['regiao-intermediaria']['UF']['regiao']['id'];
                     $retorno = $this->regioesImediatas::updateOrCreate(
                         [
                             'id' => $id
@@ -47,10 +45,10 @@ class ImportarRegioesImediatas
                         ]
                     );
                 endforeach;
+            else :
+                return response()->json(['message' => 'Erro na solicitação. Status code:'], $dados()->status());
             endif;
-            DB::commit();
         } catch (\Throwable $th) {
-            DB::rollBack();
             Log::error('Erro durante consulta de API', ['erro' => $th->getMessage()]);
             throw new Exception($th->getMessage(), 1);
         }

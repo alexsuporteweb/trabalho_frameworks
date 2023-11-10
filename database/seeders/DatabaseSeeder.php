@@ -20,7 +20,7 @@ class DatabaseSeeder extends Seeder
             EstadosSeeder::class,
             RegioesIntermediariasSeeder::class,
             MesorregioesSeeder::class,
-            MicroregioesSeeder::class,
+            MicrorregioesSeeder::class,
             RegioesImediatasSeeder::class,
             MunicipiosSeeder::class,
             SecoesSeeder::class,

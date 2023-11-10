@@ -4,7 +4,6 @@ namespace App\Actions\Imports;
 
 use App\Models\Regioes;
 use Exception;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 
@@ -21,18 +20,17 @@ class ImportarRegioes
 
     public function executar()
     {
-        DB::beginTransaction();
         try {
-            $dados = json_decode(
-                Http::get(
-                    $this->apiIbgeLocalidadesUrl . '/regioes'
-                )->body()
-            );
-            if ($dados) :
+            $url = $this->apiIbgeLocalidadesUrl . '/regioes';
+            $data = Http::timeout(300)->retry(3, 1000)->get($url);
+
+            $dados = json_decode(Http::get($url)->body(), true);
+
+            if ($data->status() === 200) :
                 foreach ($dados as $dado) :
-                    $id = $dado->id;
-                    $sigla = $dado->sigla;
-                    $nome = $dado->nome;
+                    $id = $dado['id'];
+                    $sigla = $dado['sigla'];
+                    $nome = $dado['nome'];
                     $retorno = $this->regioes::updateOrCreate(
                         [
                             'id' => $id
@@ -43,10 +41,10 @@ class ImportarRegioes
                         ]
                     );
                 endforeach;
+            else :
+                return response()->json(['message' => 'Erro na solicitação. Status code:'], $dados()->status());
             endif;
-            DB::commit();
         } catch (\Throwable $th) {
-            DB::rollBack();
             Log::error('Erro durante consulta de API', ['erro' => $th->getMessage()]);
             throw new Exception($th->getMessage(), 1);
         }

@@ -5,7 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class Microregioes extends Model
+class Microrregioes extends Model
 {
     use HasFactory;
 }

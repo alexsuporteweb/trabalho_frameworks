@@ -2,7 +2,7 @@
 
 use App\Models\Estados;
 use App\Models\Mesorregioes;
-use App\Models\Microregioes;
+use App\Models\Microrregioes;
 use App\Models\Regioes;
 use App\Models\RegioesImediatas;
 use App\Models\RegioesIntermediarias;
@@ -32,8 +32,8 @@ return new class extends Migration
                 ->constrained('mesorregioes')
                 ->onDelete('restrict')
                 ->onUpdate('restrict');
-            $table->foreignIdFor(Microregioes::class, 'microregiao_id')
-                ->constrained('microregioes')
+            $table->foreignIdFor(Microrregioes::class, 'microrregiao_id')
+                ->constrained('microrregioes')
                 ->onDelete('restrict')
                 ->onUpdate('restrict');
             $table->foreignIdFor(RegioesIntermediarias::class, 'regiao_intermediaria_id')

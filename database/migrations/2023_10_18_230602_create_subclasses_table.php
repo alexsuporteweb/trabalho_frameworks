@@ -34,7 +34,7 @@ return new class extends Migration
                 ->constrained('secoes')
                 ->onDelete('restrict')
                 ->onUpdate('restrict');
-            $table->string('atividades', 255)->nullable();
+            $table->text('atividades', 255)->nullable();
             $table->string('descricao', 255);
             $table->text('observacoes')->nullable();
             $table->timestamp('created_at')->useCurrent();
