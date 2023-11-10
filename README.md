@@ -1,15 +1,52 @@
 # trabalho_frameworks
 
+## Gere o arquivo .env
+
+```bash
 cp .env.example .env
+```
 
-definir nome do banco de dados: trabalho_frameworks
 
-composer install
+## Definir as variáveis do .env
 
-npm i
+```bash
+DB_CONNECTION=mysql
 
-npm run dev
+DB_HOST=db
 
-optimize.cmd
+DB_PORT=3306
 
-php artisan migrate:refresh --seed
+DB_DATABASE=trabalho_frameworks
+
+DB_USERNAME=root
+
+DB_PASSWORD=password
+```
+
+
+## Construa a imagem com o docker build
+
+```bash
+docker compose build
+```
+
+## Crie os containers com docker compose
+
+```bash
+docker compose up -d
+```
+
+
+## Execute os comandos no container app
+
+```bash
+docker compose exec app composer install
+
+docker compose exec app npm i
+
+docker compose exec app npm run dev
+
+docker compose exec app optimize.cmd
+
+docker compose exec app php artisan migrate:refresh --seed
+```
