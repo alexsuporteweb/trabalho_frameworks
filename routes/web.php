@@ -27,6 +27,12 @@ Route::prefix('user')->group(function () {
     Route::get('/delete/{id}', [App\Http\Controllers\UserController::class, 'destroy'])->name('user-delete');
 });
 
+Route::prefix('municipio')->group(function () {
+    Route::get('/', [App\Http\Controllers\MunicipioController::class, 'index'])->name('municipio-index');
+    Route::post('/update/{id}', [App\Http\Controllers\MunicipioController::class, 'update'])->name('municipio-update');
+    Route::get('/delete/{id}', [App\Http\Controllers\MunicipioController::class, 'destroy'])->name('municipio-delete');
+});
+
 Route::get('/dashboard', function () {
     return view('dashboard');
 })->middleware(['auth', 'verified'])->name('dashboard');
