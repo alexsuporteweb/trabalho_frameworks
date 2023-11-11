@@ -9,13 +9,13 @@
   - Rodolfo
   - Wdson
 
-## 1. Descrição da biblioteca/framework
+## 1. Laravel - PHP Framework
 
 Laravel é um framework PHP livre e open-source criado por Taylor B. Otwell para o desenvolvimento de sistemas web que utilizam o padrão MVC (model, view, controller). Algumas características proeminentes do Laravel são sua sintaxe simples e concisa, um sistema modular com gerenciador de dependências dedicado, várias formas de acesso a banco de dados relacionais e vários utilitários indispensáveis no auxílio ao desenvolvimento e manutenção de sistemas. Para fazer o uso desse framework, utilizado a ferramente Laragon que nos entrega um ambiente WEB simples e completo, para desenvolvermos nossas aplicações.A edição completa inclui Apache, MySQL, PHP, Node.js, npm, yarn, git, compositor e outras ferramentas.
 
 ## 2. Descrição do problema
 
-Desenvolver uma aplicação que abranja todos os municípios do Brasil é um desafio significativo, especialmente se você optar por cadastrar manualmente todas essas informações. Essa tarefa envolve um grande volume de dados, mas é possível realizar o processo de forma estruturada.
+Durante o desenvolvimento de uma aplicação surgiu a nescessidade de se cadastrar e manter atualizado um banco de dados com todos os municípios do Brasil. Um desafio significativo, especialmente se você optar por cadastrar manualmente todas essas informações. Essa tarefa envolve um grande volume de dados, mas é possível realizar o processo de forma estruturada.
 
 Primeiramente, é crucial organizar a coleta de dados de maneira eficiente. Recomenda-se utilizar fontes confiáveis, como bases de dados governamentais, para garantir a precisão das informações. Portais oficiais, como o IBGE (Instituto Brasileiro de Geografia e Estatística), podem fornecer dados detalhados sobre todos os municípios brasileiros, incluindo informações demográficas, geográficas e administrativas.
 
@@ -32,7 +32,7 @@ No Laravel utilizamos as classes seeders para popular o Banco de Dados no iníci
 Neste projeto criamos a classe MunicipioSeeder.php para popularmos o Banco de Dados dos municípios. Assim nessa classe no método run é chamado o método executar() da classe ImportarMunicipios.php.
 
 
-```
+```php
 <?php
 namespace Database\Seeders;
 
@@ -54,7 +54,7 @@ class MunicipiosSeeder extends Seeder
 
 Já na classe ImportarMunicipio.php, no seu método construtor é configurado os dados de chamada da API do IBGE e na função executar() é feita a chamada da API IBGE, o recebimentos dos dados, tratados erros e chamado a classe municipio.php do tipo model para a inserção no banco de dados. 
 
-```
+```php
 <?php
 namespace App\Actions\Imports;
 
@@ -120,7 +120,7 @@ class ImportarMunicipios
 
 Abaixo segue a classe Municipio.php do tipo model e assim é realizado a inclusão no banco de dados na tabela municipio.
 
-```
+```php
 <?php
 namespace App\Models;
 
@@ -140,7 +140,7 @@ Após termos nosso banco de dados atualizados com todas a informações, então 
 
 No arquivo Web.php é cadastrada todas as rotas da API e para realizarmos a busca do município, utilizamos uma requisição do tipo GET. No laravel temos a possibilidade de criar grupos de rotas, como abaixo é criado o grupo de rota municipios e depois são criados os endpoints. Para acessarmos a consulta aos municipios podemos utilizar o endereço: http://trabalho_frameworks.test/municipio no navegador ou podemos utlizar o insomnia para realizar as requisoções.
 
-```
+```php
 <?php
 
 use App\Http\Controllers\ProfileController;
@@ -154,7 +154,7 @@ Route::prefix('municipio')->group(function () {
 ```
 Apos fazermos a requisição do tipo GET: http://trabalho_frameworks.test/municipio/ é redirecinado a classe do tipo controller de nome MunicipioController.php. Na classe MunicipioControler.php é executado o método index(), conforme consta no arquivo Web.php para a realização da buscas de todos os municípios. Ja no método index() é instanciado a classe do tipo model de nome municipio.php que executa a busca no banco de dados, devolve os dados em formato json, e trata possíveis erros, conforme segue abaixo.
 
-```
+```php
 <?php
 namespace App\Http\Controllers;
 
