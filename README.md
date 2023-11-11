@@ -29,11 +29,11 @@ Os códigos abaixos ilustram as estapas para popular o Banco de Dados com as inf
 
 No Laravel utilizamos as classes seeders para popular o Banco de Dados no início da aplicação.
 
-Neste projeto criamos a classe MunicipioSeeder.php para popularmos o Banco de Dados dos municípios. Assim nessa classe no método run é chamado o método executar da classe ImportarMunicipios.php.
+Neste projeto criamos a classe MunicipioSeeder.php para popularmos o Banco de Dados dos municípios. Assim nessa classe no método run é chamado o método executar() da classe ImportarMunicipios.php.
 
 
-```php
-
+```
+<?php
 namespace Database\Seeders;
 
 use App\Actions\Imports\ImportarMunicipios;
@@ -54,8 +54,8 @@ class MunicipiosSeeder extends Seeder
 
 Já na classe ImportarMunicipio.php, no seu método construtor é configurado os dados de chamada da API do IBGE e na função executar() é feita a chamada da API IBGE, o recebimentos dos dados, tratados erros e chamado a classe municipio.php do tipo model para a inserção no banco de dados. 
 
-```php
-
+```
+<?php
 namespace App\Actions\Imports;
 
 use App\Models\Municipios;
@@ -118,10 +118,10 @@ class ImportarMunicipios
 }
 ```
 
-Abaixo segue a classe Municipio.php do tipo model. e Assim é realizado a inclusão no banco de dados na tabela municipio.
+Abaixo segue a classe Municipio.php do tipo model e assim é realizado a inclusão no banco de dados na tabela municipio.
 
-```php
-
+```
+<?php
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -136,11 +136,12 @@ class Municipios extends Model
 
 Esse padrão é realizado para popular inicialmente todas as tabelas do banco de dados referente aos dados obtidos da API do IGBE e outras tabelas como: das regiões, microregiões, estados, etc...
 
-Após termos nosso banco de dados atualizados com todas a informações, então passamos a desenvolver o objetivo da API que é busca desees dados. Abaixo é mostrado a reliazação da consulta a API de busca de dados dos municípios.
+Após termos nosso banco de dados atualizados com todas a informações, então passamos a desenvolver o objetivo da API que é busca desses dados. Abaixo é mostrado a realização da consulta a API de busca de dados dos municípios.
 
-No arquivo Web.php é cadastrada todas as rotas da API e fazermos a busca do município, sendo um requisição do tipo GET. No laravel temos a possibilidade de criar grupos de rotas, como abaixo é criado o grupo de rota municipios e depois é criados os endpoints. Para acessarmos a consulta aos municipios utilizamos o endereço: http://trabalho_frameworks.test/municipio.
+No arquivo Web.php é cadastrada todas as rotas da API e para realizarmos a busca do município, utilizamos uma requisição do tipo GET. No laravel temos a possibilidade de criar grupos de rotas, como abaixo é criado o grupo de rota municipios e depois são criados os endpoints. Para acessarmos a consulta aos municipios podemos utilizar o endereço: http://trabalho_frameworks.test/municipio no navegador ou podemos utlizar o insomnia para realizar as requisoções.
 
-```php
+```
+<?php
 
 use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
@@ -151,11 +152,39 @@ Route::prefix('municipio')->group(function () {
     Route::get('/delete/{id}', [App\Http\Controllers\MunicipioController::class, 'destroy'])->name('municipio-delete');
 });
 ```
-Apos fazermos a requisição do tipo GET: http://trabalho_frameworks.test/municipio é redirecinado a classe 
+Apos fazermos a requisição do tipo GET: http://trabalho_frameworks.test/municipio/ é redirecinado a classe do tipo controller de nome MunicipioController.php. Na classe MunicipioControler.php é executado o método index(), conforme consta no arquivo Web.php para a realização da buscas de todos os municípios. Ja no método index() é instanciado a classe do tipo model de nome municipio.php que executa a busca no banco de dados, devolve os dados em formato json, e trata possíveis erros, conforme segue abaixo.
 
+```
+<?php
+namespace App\Http\Controllers;
 
+use Illuminate\Validation\Rule;
+use App\Models\Municipios;
+use Exception;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Http\Request;
+use Ramsey\Uuid\Type\Integer;
 
+class MunicipioController extends Controller
+{
+    public function index()
+    {
+        try {
+            $municipios = Municipios::all();
+            if ($municipios->isEmpty()) {
+                return response()->json(['message' => 'Listagem vazia!'], 200);
+            }
 
+            return response()->json($municipios, 200);
+        } catch (\Throwable $th) {
+            Log::error('Erro durante a execução', ['erro' => $th->getMessage()]);
+            throw new Exception($th->getMessage(), 1);
+        }
+    }
+
+```
+
+E os demais endpoints também são criados e executados seguindo esse mesmo padrão utilizando o laravel. 
 
 ## 4. Conclusão
 
