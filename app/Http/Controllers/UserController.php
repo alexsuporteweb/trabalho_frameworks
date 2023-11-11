@@ -48,14 +48,21 @@ class UserController extends Controller
     public function store(Request $request)
     {
         try {
-            $data = $request->validate([
-                'name' => 'required',
-                'email' => ['required', Rule::unique('users')->ignore($request->id)],
-                'password' => 'required',
-                'admin' => 'required',
-            ], [
-                'email.unique' => 'O email já está em uso.',
-            ]);
+            $data = $request->validate(
+                [
+                    'name' => 'required',
+                    'email' => ['required', Rule::unique('users')->ignore($request->id)],
+                    'password' => 'required',
+                    'admin' => 'required',
+                ],
+                [
+                    'name.required' => 'name é obrigatorio.',
+                    'email.required' => 'email é obrigatorio.',
+                    'email.unique' => 'O email já está em uso.',
+                    'password.required' => 'password é obrigatorio.',
+                    'admin.required' => 'admin é obrigatorio.',
+                ]
+            );
 
             $user = User::create(
                 [
@@ -72,12 +79,12 @@ class UserController extends Controller
 
             return response()->json(['message' => 'Erro ao criar registro!'], 400);
         } catch (\Illuminate\Validation\ValidationException $exception) {
-            $errorMessage = $exception->errors()['email'][0];
 
-            if ($errorMessage) {
-                return response()->json(['message' => $errorMessage], 400);
+            $errorMessages = [];
+            foreach ($exception->errors() as $field => $errors) {
+                $errorMessages[$field] = $errors[0];
             }
-            throw $exception;
+            return response()->json(['errors' => $errorMessages], 400);
         } catch (\Throwable $th) {
             Log::error('Erro durante a execução', ['erro' => $th->getMessage()]);
             throw new Exception($th->getMessage(), 1);
@@ -145,7 +152,13 @@ class UserController extends Controller
                 'email' => ['required', Rule::unique('users')->ignore($request->id)],
                 'password' => 'required',
                 'admin' => 'required',
-            ], ['email.unique' => 'O email já está em uso.',]);
+            ], [
+                'name.required' => 'name é obrigatorio.',
+                'email.required' => 'email é obrigatorio.',
+                'email.unique' => 'O email já está em uso.',
+                'password.required' => 'password é obrigatorio.',
+                'admin.required' => 'admin é obrigatorio.',
+            ]);
 
             $user = User::find($id);
             if (!$user) {
@@ -156,12 +169,13 @@ class UserController extends Controller
 
             return response()->json(['message' => 'Registro atualizado com sucesso'], 200);
         } catch (\Illuminate\Validation\ValidationException $exception) {
-            $errorMessage = $exception->errors()['email'][0];
 
-            if ($errorMessage) {
-                return response()->json(['message' => $errorMessage], 400);
+            $errorMessages = [];
+            foreach ($exception->errors() as $field => $errors) {
+                $errorMessages[$field] = $errors[0];
             }
-            throw $exception;
+
+            return response()->json(['errors' => $errorMessages], 400);
         } catch (\Throwable $th) {
             Log::error('Erro durante a execução', ['erro' => $th->getMessage()]);
             throw new Exception($th->getMessage(), 1);

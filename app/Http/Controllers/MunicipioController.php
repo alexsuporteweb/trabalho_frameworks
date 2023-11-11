@@ -42,14 +42,14 @@ class MunicipioController extends Controller
 
             $municipio->update($data);
 
-            return response()->json(['message' => "Registro: {$municipio->id} - {$municipio->id}, atualizado com sucesso"], 200);
+            return response()->json(['message' => "Registro: {$municipio->id} - {$municipio->nome}, atualizado com sucesso"], 200);
         } catch (\Illuminate\Validation\ValidationException $exception) {
-            $errorMessage = $exception->errors()['nome'][0];
 
-            if ($errorMessage) {
-                return response()->json(['message' => $errorMessage], 400);
+            $errorMessages = [];
+            foreach ($exception->errors() as $field => $errors) {
+                $errorMessages[$field] = $errors[0];
             }
-            throw $exception;
+            return response()->json(['errors' => $errorMessages], 400);
         } catch (\Throwable $th) {
             Log::error('Erro durante a execução', ['erro' => $th->getMessage()]);
             throw new Exception($th->getMessage(), 1);
