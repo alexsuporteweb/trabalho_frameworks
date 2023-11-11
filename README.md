@@ -4,10 +4,10 @@
 - **Tecnologias aplicadas:** PHP
 - **Integrantes:**
   - Alex Lauro Bueno Gomes
-  - Joeder
-  - Rafael
-  - Rodolfo
-  - Wdson
+  - Joeder Rodrigues França Moura
+  - Rafael H. Machado
+  - Rodolfo Rossmann Gonçalves
+  - Wdson Anderson da Silva Medeiro
 
 ## 1. Laravel - PHP Framework
 
