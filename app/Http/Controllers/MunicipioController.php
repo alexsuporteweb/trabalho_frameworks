@@ -33,7 +33,7 @@ class MunicipioController extends Controller
 
             $this->validate($request, [
                 'nome' => 'required',
-            ]);
+            ], ['nome.required' => 'Campo nome é obrigatorio.',]);
 
             $municipio = Municipios::find($id);
             if (!$municipio) {
@@ -43,6 +43,13 @@ class MunicipioController extends Controller
             $municipio->update($data);
 
             return response()->json(['message' => "Registro: {$municipio->id} - {$municipio->id}, atualizado com sucesso"], 200);
+        } catch (\Illuminate\Validation\ValidationException $exception) {
+            $errorMessage = $exception->errors()['nome'][0];
+
+            if ($errorMessage) {
+                return response()->json(['message' => $errorMessage], 400);
+            }
+            throw $exception;
         } catch (\Throwable $th) {
             Log::error('Erro durante a execução', ['erro' => $th->getMessage()]);
             throw new Exception($th->getMessage(), 1);
