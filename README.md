@@ -197,7 +197,14 @@ Ao seguir esses passos, você terá uma solução Laravel eficiente que integra 
 * https://laravel-docs-pt-br.readthedocs.io/en/latest/eloquent/
 
 
-# trabalho_frameworks
+# Como baixar e instalar
+
+## Clone o repositório
+
+```bash
+git clone https://github.com/alexsuporteweb/trabalho_frameworks.git
+cd trabalho_frameworks
+```
 
 ## Gere o arquivo .env
 
