@@ -1,7 +1,7 @@
-# Projeto Final - Desenvolvimento de Software Através de Frameworks Laravel
+# Projeto Final - Desenvolvimento de Software Através da Framework Laravel
 
-- **Biblioteca/Framework:** [Nome e link da biblioteca/framework](http://google.com)
-- **Tecnologias aplicadas:** Lista de linguagens utilizadas.
+- **Biblioteca/Framework:** [Laravel - The PHP Framework For Web Artisans](https://laravel.com/)
+- **Tecnologias aplicadas:** PHP
 - **Integrantes:**
   - Alex
   - Joeder
