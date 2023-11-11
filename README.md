@@ -192,6 +192,6 @@ Ao seguir esses passos, você terá uma solução Laravel eficiente que integra 
 
 ## 5. Referências
 
-https://laravel.com/
-https://laragon.org/
-https://laravel-docs-pt-br.readthedocs.io/en/latest/eloquent/
+* https://laravel.com/
+* https://laragon.org/
+* https://laravel-docs-pt-br.readthedocs.io/en/latest/eloquent/
