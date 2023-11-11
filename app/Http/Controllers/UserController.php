@@ -10,19 +10,17 @@ use Illuminate\Http\Request;
 
 class UserController extends Controller
 {
+    private $user;
 
-    public function __construct()
+    public function __construct(User $user)
     {
-        // $this->middleware('auth');
+        $this->user = $user;
     }
 
-    /**
-     * Display a listing of the resource.
-     */
     public function index()
     {
         try {
-            $user = User::all();
+            $user = $this->user::all();
             if ($user->isEmpty()) {
                 return response()->json(['message' => 'Listagem vazia!'], 200);
             }
@@ -64,7 +62,7 @@ class UserController extends Controller
                 ]
             );
 
-            $user = User::create(
+            $user = $this->user::create(
                 [
                     'name' => $data['name'],
                     'email' => $data['email'],
@@ -97,7 +95,7 @@ class UserController extends Controller
     public function show(string $id)
     {
         try {
-            $user = User::find($id);
+            $user = $this->user::find($id);
 
             if ($user === null) {
                 return response()->json(['message' => 'Registro não encontrado!'], 404);
@@ -121,7 +119,7 @@ class UserController extends Controller
     public function edit(string $id)
     {
         try {
-            $user = User::find($id);
+            $user = $this->user::find($id);
 
             if ($user === null) {
                 return response()->json(['message' => 'Registro não encontrado!'], 404);
@@ -160,7 +158,7 @@ class UserController extends Controller
                 'admin.required' => 'admin é obrigatorio.',
             ]);
 
-            $user = User::find($id);
+            $user = $this->user::find($id);
             if (!$user) {
                 return response()->json(['message' => 'Registro não encontrado!'], 404);
             }
@@ -188,7 +186,7 @@ class UserController extends Controller
     public function destroy(string $id)
     {
         try {
-            $user = User::find($id);
+            $user = $this->user::find($id);
 
             if ($user === null) {
                 return response()->json(['message' => 'Registro não encontrado!'], 404);
@@ -200,12 +198,5 @@ class UserController extends Controller
             Log::error('Erro durante a execução', ['erro' => $th->getMessage()]);
             throw new Exception($th->getMessage(), 1);
         }
-    }
-
-    public function messages()
-    {
-        return [
-            'email.unique' => 'O email já está em uso.',
-        ];
     }
 }

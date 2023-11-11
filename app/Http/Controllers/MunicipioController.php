@@ -11,10 +11,17 @@ use Ramsey\Uuid\Type\Integer;
 
 class MunicipioController extends Controller
 {
+    private $municipios;
+
+    public function __construct(Municipios $municipios)
+    {
+        $this->municipios = $municipios;
+    }
+
     public function index()
     {
         try {
-            $municipios = Municipios::all();
+            $municipios =  $this->municipios::all();
             if ($municipios->isEmpty()) {
                 return response()->json(['message' => 'Listagem vazia!'], 200);
             }
@@ -35,7 +42,7 @@ class MunicipioController extends Controller
                 'nome' => 'required',
             ], ['nome.required' => 'Campo nome é obrigatorio.',]);
 
-            $municipio = Municipios::find($id);
+            $municipio =  $this->municipios::find($id);
             if (!$municipio) {
                 return response()->json(['message' => 'Registro não encontrado!'], 404);
             }
@@ -59,7 +66,7 @@ class MunicipioController extends Controller
     public function destroy(string $id)
     {
         try {
-            $municipio = Municipios::find($id);
+            $municipio =  $this->municipios::find($id);
 
             if ($municipio === null) {
                 return response()->json(['message' => 'Registro não encontrado!'], 404);
