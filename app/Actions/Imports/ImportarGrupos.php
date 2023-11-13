@@ -4,7 +4,7 @@ namespace App\Actions\Imports;
 
 use App\Models\Divisao;
 use App\Models\Grupo;
-use App\Models\Secoes;
+use App\Models\Secao;
 use Exception;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
@@ -13,15 +13,15 @@ class ImportarGrupo
 {
     private $divisao;
     private $grupo;
-    private $secoes;
+    private $secao;
     private $apiIbgeCnaeUrl;
     private $pagina;
 
-    public function __construct(Divisao $divisao, Grupo $grupo, Secoes $secoes)
+    public function __construct(Divisao $divisao, Grupo $grupo, Secao $secao)
     {
         $this->grupo = $grupo;
         $this->divisao = $divisao;
-        $this->secoes = $secoes;
+        $this->secao = $secao;
         $this->apiIbgeCnaeUrl = env('API_IBGE_CNAE_URL');
         $this->pagina = '/grupo';
     }
@@ -39,7 +39,7 @@ class ImportarGrupo
                 foreach ($data as $item) {
                     $dados = [
                         'divisao_id' => $this->divisao::where('codigo', $item['divisao']['id'])->first()->id,
-                        'secao_id' => $this->secoes::where('codigo', $item['divisao']['secao']['id'])->first()->id,
+                        'secao_id' => $this->secao::where('codigo', $item['divisao']['secao']['id'])->first()->id,
                         'descricao' => $item['descricao'],
                     ];
 

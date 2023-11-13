@@ -3,7 +3,7 @@
 namespace App\Actions\Imports;
 
 use App\Models\Divisao;
-use App\Models\Secoes;
+use App\Models\Secao;
 use Exception;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
@@ -11,14 +11,14 @@ use Illuminate\Support\Facades\Log;
 class ImportarDivisao
 {
     private $divisao;
-    private $secoes;
+    private $secao;
     private $apiIbgeCnaeUrl;
     private $pagina;
 
-    public function __construct(Divisao $divisao, Secoes $secoes)
+    public function __construct(Divisao $divisao, Secao $secao)
     {
         $this->divisao = $divisao;
-        $this->secoes = $secoes;
+        $this->secao = $secao;
         $this->apiIbgeCnaeUrl = env('API_IBGE_CNAE_URL');
         $this->pagina = '/divisao';
     }
@@ -36,7 +36,7 @@ class ImportarDivisao
                 foreach ($data as $item) {
                     $dados = [
                         'codigo' => $item['id'],
-                        'secao_id' => $this->secoes::where('codigo', $item['secao']['id'])->first()->id,
+                        'secao_id' => $this->secao::where('codigo', $item['secao']['id'])->first()->id,
                         'descricao' => $item['descricao'],
                     ];
 
