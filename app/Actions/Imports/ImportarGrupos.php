@@ -2,55 +2,62 @@
 
 namespace App\Actions\Imports;
 
-use App\Models\Divisoes;
-use App\Models\Grupos;
+use App\Models\Divisao;
+use App\Models\Grupo;
 use App\Models\Secoes;
 use Exception;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 
-class ImportarGrupos
+class ImportarGrupo
 {
-    private $grupos;
+    private $divisao;
+    private $grupo;
+    private $secoes;
     private $apiIbgeCnaeUrl;
+    private $pagina;
 
-    public function __construct(Grupos $grupos)
+    public function __construct(Divisao $divisao, Grupo $grupo, Secoes $secoes)
     {
-        $this->grupos = $grupos;
+        $this->grupo = $grupo;
+        $this->divisao = $divisao;
+        $this->secoes = $secoes;
         $this->apiIbgeCnaeUrl = env('API_IBGE_CNAE_URL');
+        $this->pagina = '/grupo';
     }
 
     public function executar()
     {
+        $start_time = microtime(true);
         try {
-            $url = $this->apiIbgeCnaeUrl . '/grupos';
-            $data = Http::timeout(300)->retry(3, 1000)->get($url);
+            $uri = $this->apiIbgeCnaeUrl . $this->pagina;
+            $response = Http::timeout(300)->retry(3, 1000)->get($uri);
 
-            $dados = json_decode(Http::get($url)->body(), true);
+            if ($response->successful()) {
+                $data = json_decode($response->body(), true);
 
-            if ($data->status() === 200) :
-                foreach ($dados as $dado) :
-                    $codigo = $dado['id'];
-                    $divisao_id = Divisoes::where('codigo', $dado['divisao']['id'])->first()->id;
-                    $secao_id = Secoes::where('codigo', $dado['divisao']['secao']['id'])->first()->id;
-                    $descricao = $dado['descricao'];
-                    $retorno = $this->grupos::updateOrCreate(
-                        [
-                            'codigo' => $codigo
-                        ],
-                        [
-                            'divisao_id' => $divisao_id,
-                            'secao_id' => $secao_id,
-                            'descricao' => $descricao,
-                        ]
+                foreach ($data as $item) {
+                    $dados = [
+                        'divisao_id' => $this->divisao::where('codigo', $item['divisao']['id'])->first()->id,
+                        'secao_id' => $this->secoes::where('codigo', $item['divisao']['secao']['id'])->first()->id,
+                        'descricao' => $item['descricao'],
+                    ];
+
+                    $this->grupo::updateOrCreate(
+                        ['codigo' => $item['id']],
+                        $dados
                     );
-                endforeach;
-            else :
-                return response()->json(['message' => 'Erro na solicitação. Status code:'], $dados()->status());
-            endif;
+                }
+            } else {
+                return response()->json(['message' => 'Erro na solicitação. Status code: ' . $response->status()], 400);
+            }
         } catch (\Throwable $th) {
             Log::error('Erro durante consulta de API', ['erro' => $th->getMessage()]);
             throw new Exception($th->getMessage(), 1);
+        } finally {
+            $end_time = microtime(true);
+            $execution_time = round($end_time - $start_time, 2);
         }
+        echo 'Seeding completed in ' . $execution_time . ' seconds.' . PHP_EOL;
     }
 }

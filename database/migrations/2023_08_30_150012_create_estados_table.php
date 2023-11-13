@@ -1,6 +1,6 @@
 <?php
 
-use App\Models\Regioes;
+use App\Models\Regiao;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
@@ -16,7 +16,7 @@ return new class extends Migration
             $table->bigIncrements('id');
             $table->string('sigla', 2)->unique();
             $table->string('nome', 120)->unique();
-            $table->foreignIdFor(Regioes::class, 'regiao_id')
+            $table->foreignIdFor(Regiao::class, 'regiao_id')
                 ->constrained('regioes')
                 ->onDelete('restrict')
                 ->onUpdate('restrict');

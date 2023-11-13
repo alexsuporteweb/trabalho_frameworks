@@ -2,59 +2,70 @@
 
 namespace App\Actions\Imports;
 
-use App\Models\Divisoes;
+use App\Models\Divisao;
 use App\Models\Secoes;
 use Exception;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 
-class ImportarDivisoes
+class ImportarDivisao
 {
-    private $divisoes;
+    private $divisao;
+    private $secoes;
     private $apiIbgeCnaeUrl;
+    private $pagina;
 
-    public function __construct(Divisoes $divisoes)
+    public function __construct(Divisao $divisao, Secoes $secoes)
     {
-        $this->divisoes = $divisoes;
+        $this->divisao = $divisao;
+        $this->secoes = $secoes;
         $this->apiIbgeCnaeUrl = env('API_IBGE_CNAE_URL');
+        $this->pagina = '/divisao';
     }
 
     public function executar()
     {
+        $start_time = microtime(true);
         try {
-            $url = $this->apiIbgeCnaeUrl . '/divisoes';
-            $data = Http::timeout(300)->retry(3, 1000)->get($url);
+            $uri = $this->apiIbgeCnaeUrl . $this->pagina;
+            $response = Http::timeout(300)->retry(3, 1000)->get($uri);
 
-            $dados = json_decode(Http::get($url)->body(), true);
+            if ($response->successful()) {
+                $data = json_decode($response->body(), true);
 
-            if ($data->status() === 200) :
-                foreach ($dados as $dado) :
-                    $codigo = $dado['id'];
-                    $secao_id = Secoes::where('codigo', $dado['secao']['id'])->first()->id;
-                    $descricao = $dado['descricao'];
+                foreach ($data as $item) {
+                    $dados = [
+                        'codigo' => $item['id'],
+                        'secao_id' => $this->secoes::where('codigo', $item['secao']['id'])->first()->id,
+                        'descricao' => $item['descricao'],
+                    ];
 
                     $observacoes = '';
-                    for ($i = 0; $i < count($dado['observacoes']); $i++) :
-                        $observacoes .= "{$dado['observacoes'][$i]}\r\n";
+                    for ($i = 0; $i < count($item['observacoes']); $i++) :
+                        $observacoes .= "{$item['observacoes'][$i]}\r\n";
                     endfor;
 
-                    $retorno = $this->divisoes::updateOrCreate(
+                    $this->divisao::updateOrCreate(
                         [
-                            'codigo' => $codigo
+                            'codigo' => $dados['codigo']
                         ],
                         [
-                            'secao_id' => $secao_id,
-                            'descricao' => $descricao,
+                            'secao_id' => $dados['secao_id'],
+                            'descricao' => $dados['descricao'],
                             'observacoes' => $observacoes,
                         ]
                     );
-                endforeach;
-            else :
-                return response()->json(['message' => 'Erro na solicitação. Status code:'], $dados()->status());
-            endif;
+                }
+            } else {
+                return response()->json(['message' => 'Erro na solicitação. Status code: ' . $response->status()], 400);
+            }
         } catch (\Throwable $th) {
             Log::error('Erro durante consulta de API', ['erro' => $th->getMessage()]);
             throw new Exception($th->getMessage(), 1);
+        } finally {
+            $end_time = microtime(true);
+            $execution_time = round($end_time - $start_time, 2);
         }
+        echo 'Seeding completed in ' . $execution_time . ' seconds.' . PHP_EOL;
     }
 }

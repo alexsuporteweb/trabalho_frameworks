@@ -2,65 +2,61 @@
 
 namespace App\Actions\Imports;
 
-use App\Models\Paises;
+use App\Models\Pais;
 use Exception;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 
 class ImportarPaises
 {
-    private $paises;
+    private $pais;
     private $apiIbgeLocalidadesUrl;
+    private $pagina;
 
-    public function __construct(Paises $paises)
+    public function __construct(Pais $pais)
     {
-        $this->paises = $paises;
+        $this->pais = $pais;
         $this->apiIbgeLocalidadesUrl = env('API_IBGE_LOCALIDADES_URL');
+        $this->pagina = '/pais';
     }
 
     public function executar()
     {
+        $start_time = microtime(true);
         try {
-            $url = $this->apiIbgeLocalidadesUrl . '/paises';
-            $data = Http::timeout(300)->retry(3, 1000)->get($url);
+            $uri = $this->apiIbgeLocalidadesUrl . $this->pagina;
+            $response = Http::timeout(300)->retry(3, 1000)->get($uri);
 
-            $dados = json_decode(Http::get($url)->body(), true);
+            if ($response->successful()) {
+                $data = json_decode($response->body(), true);
 
-            if ($data->status() === 200) :
-                foreach ($dados as $dado) {
-                    $m49 = $dado['id']['M49'];
-                    $iso_alpha_2 = $dado['id']['ISO-ALPHA-2'];
-                    $iso_alpha_3 = $dado['id']['ISO-ALPHA-3'];
-                    $nome = $dado['nome'];
-                    $regiao_intermediaria_m49 = $dado['regiao-intermediaria']['id']['M49'] ?? null;
-                    $regiao_intermediaria = $dado['regiao-intermediaria']['nome'] ?? null;
-                    $sub_regiao_m49 = $dado['sub-regiao']['id']['M49'];
-                    $sub_regiao = $dado['sub-regiao']['nome'];
-                    $regiao_m49 = $dado['sub-regiao']['regiao']['id']['M49'];
-                    $regiao = $dado['sub-regiao']['regiao']['nome'];
-                    $retorno = $this->paises::updateOrCreate(
-                        [
-                            'm49' => $m49,
-                        ],
-                        [
-                            'iso_alpha_2' => $iso_alpha_2,
-                            'iso_alpha_3' => $iso_alpha_3,
-                            'nome' => $nome,
-                            'regiao_intermediaria_m49' => $regiao_intermediaria_m49 ?? null,
-                            'regiao_intermediaria' => $regiao_intermediaria ?? null,
-                            'sub_regiao_m49' => $sub_regiao_m49,
-                            'sub_regiao' => $sub_regiao,
-                            'regiao_m49' => $regiao_m49,
-                            'regiao' => $regiao,
-                        ]
+                foreach ($data as $item) {
+                    $dados = [
+                        'iso_alpha_2' => $item['id']['ISO-ALPHA-2'],
+                        'iso_alpha_3' => $item['id']['ISO-ALPHA-3'],
+                        'nome' => $item['nome'],
+                        'regiao_intermediaria_m49' => $item['regiao-intermediaria']['id']['M49'] ?? null,
+                        'regiao_intermediaria' => $item['regiao-intermediaria']['nome'] ?? null,
+                        'sub_regiao_m49' => $item['sub-regiao']['id']['M49'],
+                        'sub_regiao' => $item['sub-regiao']['nome'],
+                        'regiao_m49' => $item['sub-regiao']['regiao']['id']['M49'],
+                        'regiao' => $item['sub-regiao']['regiao']['nome'],
+                    ];
+                    $this->pais::updateOrCreate(
+                        ['m49' => $item['id']['M49']],
+                        $dados
                     );
                 }
-            else :
-                return response()->json(['message' => 'Erro na solicitação. Status code:'], $dados()->status());
-            endif;
+            } else {
+                return response()->json(['message' => 'Erro na solicitação. Status code: ' . $response->status()], 400);
+            }
         } catch (\Throwable $th) {
             Log::error('Erro durante consulta de API', ['erro' => $th->getMessage()]);
             throw new Exception($th->getMessage(), 1);
+        } finally {
+            $end_time = microtime(true);
+            $execution_time = round($end_time - $start_time, 2);
         }
+        echo 'Seeding completed in ' . $execution_time . ' seconds.' . PHP_EOL;
     }
 }

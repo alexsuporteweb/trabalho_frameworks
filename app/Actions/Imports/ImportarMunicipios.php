@@ -2,61 +2,61 @@
 
 namespace App\Actions\Imports;
 
-use App\Models\Municipios;
+use App\Models\Municipio;
 use Exception;
+use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 
 class ImportarMunicipios
 {
-    private $municipios;
+    private $municipio;
     private $apiIbgeLocalidadesUrl;
+    private $pagina;
 
-    public function __construct(Municipios $municipios)
+    public function __construct(Municipio $municipio)
     {
-        $this->municipios = $municipios;
+        $this->municipio = $municipio;
         $this->apiIbgeLocalidadesUrl = env('API_IBGE_LOCALIDADES_URL');
+        $this->pagina = '/municipio';
     }
 
     public function executar()
     {
+        $start_time = microtime(true);
         try {
-            $url = $this->apiIbgeLocalidadesUrl . '/municipios';
-            $data = Http::timeout(300)->retry(3, 1000)->get($url);
+            $uri = $this->apiIbgeLocalidadesUrl . $this->pagina;
+            $response = Http::timeout(300)->retry(3, 1000)->get($uri);
 
-            $dados = json_decode(Http::get($url)->body(), true);
+            if ($response->successful()) {
+                $data = json_decode($response->body(), true);
 
-            if ($data->status() === 200) :
-                foreach ($dados as $dado) :
-                    $id = $dado['id'];
-                    $nome = $dado['nome'];
-                    $microrregiao_id = $dado['microrregiao']['id'];
-                    $mesorregiao_id = $dado['microrregiao']['mesorregiao']['id'];
-                    $estado_id = $dado['microrregiao']['mesorregiao']['UF']['id'];
-                    $regiao_id = $dado['microrregiao']['mesorregiao']['UF']['regiao']['id'];
-                    $regiao_imediata_id = $dado['regiao-imediata']['id'];
-                    $regiao_intermediaria_id = $dado['regiao-imediata']['regiao-intermediaria']['id'];
-                    $retorno = $this->municipios::updateOrCreate(
-                        [
-                            'id' => $id
-                        ],
-                        [
-                            'nome' => $nome,
-                            'microrregiao_id' => $microrregiao_id,
-                            'mesorregiao_id' => $mesorregiao_id,
-                            'estado_id' => $estado_id,
-                            'regiao_id' => $regiao_id,
-                            'regiao_imediata_id' => $regiao_imediata_id,
-                            'regiao_intermediaria_id' => $regiao_intermediaria_id,
-                        ]
+                foreach ($data as $item) {
+                    $dados = [
+                        'nome' => $item['nome'],
+                        'microrregiao_id' => $item['microrregiao']['id'],
+                        'mesorregiao_id' => $item['microrregiao']['mesorregiao']['id'],
+                        'estado_id' => $item['microrregiao']['mesorregiao']['UF']['id'],
+                        'regiao_id' => $item['microrregiao']['mesorregiao']['UF']['regiao']['id'],
+                        'regiao_imediata_id' => $item['regiao-imediata']['id'],
+                        'regiao_intermediaria_id' => $item['regiao-imediata']['regiao-intermediaria']['id'],
+                    ];
+
+                    $this->municipio::updateOrCreate(
+                        ['id' => $item['id']],
+                        $dados
                     );
-                endforeach;
-            else :
-                return response()->json(['message' => 'Erro na solicitação. Status code:'], $dados()->status());
-            endif;
+                }
+            } else {
+                return response()->json(['message' => 'Erro na solicitação. Status code: ' . $response->status()], 400);
+            }
         } catch (\Throwable $th) {
             Log::error('Erro durante consulta de API', ['erro' => $th->getMessage()]);
             throw new Exception($th->getMessage(), 1);
+        } finally {
+            $end_time = microtime(true);
+            $execution_time = round($end_time - $start_time, 2);
         }
+        echo 'Seeding completed in ' . $execution_time . ' seconds.' . PHP_EOL;
     }
 }

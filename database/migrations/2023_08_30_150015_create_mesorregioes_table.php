@@ -1,7 +1,7 @@
 <?php
 
-use App\Models\Estados;
-use App\Models\Regioes;
+use App\Models\Estado;
+use App\Models\Regiao;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
@@ -16,11 +16,11 @@ return new class extends Migration
         Schema::create('mesorregioes', function (Blueprint $table) {
             $table->bigIncrements('id');
             $table->string('nome', 120)->index();
-            $table->foreignIdFor(Estados::class, 'estado_id')
+            $table->foreignIdFor(Estado::class, 'estado_id')
                 ->constrained('estados')
                 ->onDelete('restrict')
                 ->onUpdate('restrict');
-            $table->foreignIdFor(Regioes::class, 'regiao_id')
+            $table->foreignIdFor(Regiao::class, 'regiao_id')
                 ->constrained('regioes')
                 ->onDelete('restrict')
                 ->onUpdate('restrict');

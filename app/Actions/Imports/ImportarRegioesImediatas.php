@@ -2,55 +2,57 @@
 
 namespace App\Actions\Imports;
 
-use App\Models\RegioesImediatas;
+use App\Models\RegiaoImediata;
 use Exception;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 
 class ImportarRegioesImediatas
 {
-    private $regioesImediatas;
+    private $regiaoImediata;
     private $apiIbgeLocalidadesUrl;
+    private $pagina;
 
-    public function __construct(RegioesImediatas $regioesImediatas)
+    public function __construct(RegiaoImediata $regiaoImediata)
     {
-        $this->regioesImediatas = $regioesImediatas;
+        $this->regiaoImediata = $regiaoImediata;
         $this->apiIbgeLocalidadesUrl = env('API_IBGE_LOCALIDADES_URL');
+        $this->pagina = '/regiao-imediatas';
     }
 
     public function executar()
     {
+        $start_time = microtime(true);
         try {
-            $url = $this->apiIbgeLocalidadesUrl . '/regioes-imediatas';
-            $data = Http::timeout(300)->retry(3, 1000)->get($url);
+            $uri = $this->apiIbgeLocalidadesUrl . $this->pagina;
+            $response = Http::timeout(300)->retry(3, 1000)->get($uri);
 
-            $dados = json_decode(Http::get($url)->body(), true);
+            if ($response->successful()) {
+                $data = json_decode($response->body(), true);
 
-            if ($data->status() === 200) :
-                foreach ($dados as $dado) :
-                    $id = $dado['id'];
-                    $nome = $dado['nome'];
-                    $regiao_intermediaria_id = $dado['regiao-intermediaria']['id'];
-                    $estado_id = $dado['regiao-intermediaria']['UF']['id'];
-                    $regiao_id = $dado['regiao-intermediaria']['UF']['regiao']['id'];
-                    $retorno = $this->regioesImediatas::updateOrCreate(
-                        [
-                            'id' => $id
-                        ],
-                        [
-                            'nome' => $nome,
-                            'regiao_intermediaria_id' => $regiao_intermediaria_id,
-                            'estado_id' => $estado_id,
-                            'regiao_id' => $regiao_id,
-                        ]
+                foreach ($data as $item) {
+                    $dados = [
+                        'nome' => $item['nome'],
+                        'regiao_intermediaria_id' => $item['regiao-intermediaria']['id'],
+                        'estado_id' => $item['regiao-intermediaria']['UF']['id'],
+                        'regiao_id' => $item['regiao-intermediaria']['UF']['regiao']['id'],
+                    ];
+
+                    $this->regiaoImediata::updateOrCreate(
+                        ['id' => $item['id']],
+                        $dados
                     );
-                endforeach;
-            else :
-                return response()->json(['message' => 'Erro na solicitação. Status code:'], $dados()->status());
-            endif;
+                }
+            } else {
+                return response()->json(['message' => 'Erro na solicitação. Status code: ' . $response->status()], 400);
+            }
         } catch (\Throwable $th) {
             Log::error('Erro durante consulta de API', ['erro' => $th->getMessage()]);
             throw new Exception($th->getMessage(), 1);
+        } finally {
+            $end_time = microtime(true);
+            $execution_time = round($end_time - $start_time, 2);
         }
+        echo 'Seeding completed in ' . $execution_time . ' seconds.' . PHP_EOL;
     }
 }

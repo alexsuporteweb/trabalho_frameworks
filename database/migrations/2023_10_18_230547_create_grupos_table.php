@@ -1,7 +1,7 @@
 <?php
 
-use App\Models\Divisoes;
-use App\Models\Secoes;
+use App\Models\Divisao;
+use App\Models\Secao;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
@@ -16,11 +16,11 @@ return new class extends Migration
         Schema::create('grupos', function (Blueprint $table) {
             $table->bigIncrements('id');
             $table->char('codigo', 5)->unique();
-            $table->foreignIdFor(Divisoes::class, 'divisao_id')
+            $table->foreignIdFor(Divisao::class, 'divisao_id')
                 ->constrained('divisoes')
                 ->onDelete('restrict')
                 ->onUpdate('restrict');
-            $table->foreignIdFor(Secoes::class, 'secao_id')
+            $table->foreignIdFor(Secao::class, 'secao_id')
                 ->constrained('secoes')
                 ->onDelete('restrict')
                 ->onUpdate('restrict');
