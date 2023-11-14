@@ -17,7 +17,7 @@ class ImportarMesorregioes
     {
         $this->mesorregiao = $mesorregiao;
         $this->apiIbgeLocalidadesUrl = env('API_IBGE_LOCALIDADES_URL');
-        $this->pagina = '/mesorregiao';
+        $this->pagina = '/mesorregioes';
     }
 
     public function executar()

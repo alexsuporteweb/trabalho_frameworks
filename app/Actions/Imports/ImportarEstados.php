@@ -17,7 +17,7 @@ class ImportarEstados
     {
         $this->estado = $estado;
         $this->apiIbgeLocalidadesUrl = env('API_IBGE_LOCALIDADES_URL');
-        $this->pagina = '/estado';
+        $this->pagina = '/estados';
     }
 
     public function executar()

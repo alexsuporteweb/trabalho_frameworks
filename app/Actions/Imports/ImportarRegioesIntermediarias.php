@@ -17,7 +17,7 @@ class ImportarRegioesIntermediarias
     {
         $this->regiaoIntermediaria = $regiaoIntermediaria;
         $this->apiIbgeLocalidadesUrl = env('API_IBGE_LOCALIDADES_URL');
-        $this->pagina = '/regiao-intermediarias';
+        $this->pagina = '/regioes-intermediarias';
     }
 
     public function executar()

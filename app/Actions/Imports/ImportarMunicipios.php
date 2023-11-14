@@ -18,7 +18,7 @@ class ImportarMunicipios
     {
         $this->municipio = $municipio;
         $this->apiIbgeLocalidadesUrl = env('API_IBGE_LOCALIDADES_URL');
-        $this->pagina = '/municipio';
+        $this->pagina = '/municipios';
     }
 
     public function executar()

@@ -9,7 +9,7 @@ use Exception;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 
-class ImportarGrupo
+class ImportarGrupos
 {
     private $divisao;
     private $grupo;
@@ -23,7 +23,7 @@ class ImportarGrupo
         $this->divisao = $divisao;
         $this->secao = $secao;
         $this->apiIbgeCnaeUrl = env('API_IBGE_CNAE_URL');
-        $this->pagina = '/grupo';
+        $this->pagina = '/grupos';
     }
 
     public function executar()

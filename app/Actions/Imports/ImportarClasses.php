@@ -4,8 +4,8 @@ namespace App\Actions\Imports;
 
 use App\Models\Divisao;
 use App\Models\Grupo;
-use App\Models\Secoes;
-use App\Models\Classes;
+use App\Models\Secao;
+use App\Models\Classe;
 use Exception;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
@@ -14,21 +14,21 @@ class ImportarClasses
 {
     private $divisao;
     private $grupo;
-    private $secoes;
-    private $classes;
+    private $secao;
+    private $classe;
     private $apiIbgeCnaeUrl;
     private $pagina;
 
     public function __construct(
         Divisao $divisao,
         Grupo $grupo,
-        Secoes $secoes,
-        Classes $classes
+        Secao $secao,
+        Classe $classe
     ) {
         $this->divisao = $divisao;
         $this->grupo = $grupo;
-        $this->secoes = $secoes;
-        $this->classes = $classes;
+        $this->secao = $secao;
+        $this->classe = $classe;
         $this->apiIbgeCnaeUrl = env('API_IBGE_CNAE_URL');
         $this->pagina = '/classes';
     }
@@ -48,7 +48,7 @@ class ImportarClasses
                         'codigo' => $item['id'],
                         'grupo_id' => $this->grupo::where('codigo', $item['grupo']['id'])->first()->id,
                         'divisao_id' => $this->divisao::where('codigo', $item['grupo']['divisao']['id'])->first()->id,
-                        'secao_id' => $this->secoes::where('codigo', $item['grupo']['divisao']['secao']['id'])->first()->id,
+                        'secao_id' => $this->secao::where('codigo', $item['grupo']['divisao']['secao']['id'])->first()->id,
                         'descricao' => $item['descricao'],
                     ];
 
@@ -57,7 +57,7 @@ class ImportarClasses
                         $observacoes .= "{$item['observacoes'][$i]}\r\n";
                     endfor;
 
-                    $this->classes::updateOrCreate(
+                    $this->classe::updateOrCreate(
                         [
                             'codigo' => $dados['codigo']
                         ],

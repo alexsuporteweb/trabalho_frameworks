@@ -17,7 +17,7 @@ class ImportarRegioes
     {
         $this->regiao = $regiao;
         $this->apiIbgeLocalidadesUrl = env('API_IBGE_LOCALIDADES_URL');
-        $this->pagina = '/regiao';
+        $this->pagina = '/regioes';
     }
 
     public function executar()

@@ -2,37 +2,37 @@
 
 namespace App\Actions\Imports;
 
-use App\Models\Classes;
+use App\Models\Classe;
 use App\Models\Divisao;
 use App\Models\Grupo;
-use App\Models\Secoes;
-use App\Models\Subclasses;
+use App\Models\Secao;
+use App\Models\Subclasse;
 use Exception;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 
 class ImportarSubclasses
 {
-    private $classes;
+    private $classe;
     private $divisao;
     private $grupo;
-    private $secoes;
-    private $subClasses;
+    private $secao;
+    private $subClasse;
     private $apiIbgeCnaeUrl;
     private $pagina;
 
     public function __construct(
-        Classes $classes,
+        Classe $classe,
         Divisao $divisao,
         Grupo $grupo,
-        Secoes $secoes,
-        Subclasses $subClasses
+        Secao $secao,
+        Subclasse $subClasse
     ) {
-        $this->classes = $classes;
+        $this->classe = $classe;
         $this->divisao = $divisao;
         $this->grupo = $grupo;
-        $this->secoes = $secoes;
-        $this->subClasses = $subClasses;
+        $this->secao = $secao;
+        $this->subClasse = $subClasse;
         $this->apiIbgeCnaeUrl = env('API_IBGE_CNAE_URL');
         $this->pagina = '/subclasses';
     }
@@ -50,10 +50,10 @@ class ImportarSubclasses
                 foreach ($data as $dado) :
                     $codigo = $dado['id'];
                     $descricao = $dado['descricao'];
-                    $classe_id = $this->classes::where('codigo', $dado['classe']['id'])->first()->id;
+                    $classe_id = $this->classe::where('codigo', $dado['classe']['id'])->first()->id;
                     $grupo_id = $this->grupo::where('codigo', $dado['classe']['grupo']['id'])->first()->id;
                     $divisao_id = $this->divisao::where('codigo', $dado['classe']['grupo']['divisao']['id'])->first()->id;
-                    $secao_id = $this->secoes::where('codigo', $dado['classe']['grupo']['divisao']['secao']['id'])->first()->id;
+                    $secao_id = $this->secao::where('codigo', $dado['classe']['grupo']['divisao']['secao']['id'])->first()->id;
 
                     $atividades = '';
                     for ($i = 0; $i < count($dado['atividades']); $i++) :
@@ -65,7 +65,7 @@ class ImportarSubclasses
                         $observacoes .= "{$dado['observacoes'][$i]}\r\n";
                     endfor;
 
-                    $retorno = $this->subClasses::updateOrCreate(
+                    $retorno = $this->subClasse::updateOrCreate(
                         [
                             'codigo' => $codigo
                         ],

@@ -17,7 +17,7 @@ class ImportarMicrorregioes
     {
         $this->microrregiao = $microregioes;
         $this->apiIbgeLocalidadesUrl = env('API_IBGE_LOCALIDADES_URL');
-        $this->pagina = '/microrregiao';
+        $this->pagina = '/microrregioes';
     }
 
     public function executar()

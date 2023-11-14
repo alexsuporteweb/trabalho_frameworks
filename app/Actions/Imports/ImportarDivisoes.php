@@ -8,7 +8,7 @@ use Exception;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 
-class ImportarDivisao
+class ImportarDivisoes
 {
     private $divisao;
     private $secao;
@@ -20,7 +20,7 @@ class ImportarDivisao
         $this->divisao = $divisao;
         $this->secao = $secao;
         $this->apiIbgeCnaeUrl = env('API_IBGE_CNAE_URL');
-        $this->pagina = '/divisao';
+        $this->pagina = '/divisoes';
     }
 
     public function executar()
@@ -66,6 +66,6 @@ class ImportarDivisao
             $end_time = microtime(true);
             $execution_time = round($end_time - $start_time, 2);
         }
-        echo 'Seeding completed in ' . $execution_time . ' seconds.' . PHP_EOL;
+        echo '   Seeding completed in ' . $execution_time . ' seconds.' . PHP_EOL;
     }
 }

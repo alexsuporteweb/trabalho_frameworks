@@ -7,5 +7,9 @@ use Illuminate\Database\Eloquent\Model;
 
 class Secao extends Model
 {
+    protected $table = 'secoes';
+    protected $guarded = ['_token', 'id'];
+    protected static $ignoreChangedAttributes = ['created_at', 'updated_at'];
+
     use HasFactory;
 }

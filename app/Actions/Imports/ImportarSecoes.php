@@ -2,27 +2,26 @@
 
 namespace App\Actions\Imports;
 
-use App\Models\Secoes;
+use App\Models\Secao;
 use Exception;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 
 class ImportarSecoes
 {
-    private $secoes;
+    private $secao;
     private $apiIbgeCnaeUrl;
     private $pagina;
 
-    public function __construct(Secoes $secoes)
+    public function __construct(Secao $secao)
     {
-        $this->secoes = $secoes;
+        $this->secao = $secao;
         $this->apiIbgeCnaeUrl = env('API_IBGE_CNAE_URL');
         $this->pagina = '/secoes';
     }
 
     public function executar()
     {
-
         $start_time = microtime(true);
         try {
             $uri = $this->apiIbgeCnaeUrl . $this->pagina;
@@ -41,7 +40,7 @@ class ImportarSecoes
                         $observacoes .= "{$item['observacoes'][$i]}\r\n";
                     endfor;
 
-                    $this->secoes::updateOrCreate(
+                    $this->secao::updateOrCreate(
                         [
                             'codigo' => $item['id']
                         ],
